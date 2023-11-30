@@ -1,16 +1,13 @@
 package main
 
 import (
-	"github.com/jafari-mohammad-reza/echo-htmx-practice/src/pkg"
+	"github.com/jafari-mohammad-reza/echo-htmx-practice/pkg"
+	"github.com/jafari-mohammad-reza/echo-htmx-practice/pkg/db"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/time/rate"
 	"net/http"
 )
-
-type Msg struct {
-	Message string
-}
 
 func main() {
 	e := echo.New()
@@ -20,11 +17,16 @@ func main() {
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(
 		rate.Limit(20),
 	)))
-
 	pkg.NewTemplateRenderer(e, "views/*.html")
+	err := db.SeedInit()
+	if err != nil {
+		panic(err)
+	}
+
 	e.GET("/hello", func(e echo.Context) error {
-		msg := Msg{Message: "Hello world"}
-		return e.Render(http.StatusOK, "index.html", msg)
+		return e.Render(http.StatusOK, "index.html", map[string]string{
+			"Message": "Hello world.",
+		})
 	})
 
 	e.Logger.Fatal(e.Start(":4040"))
