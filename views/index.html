@@ -10,8 +10,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-<p class="text-red-500">
-        {{ .Message}}
-</p>
+    <div id="blog-container" class="bg-white p-4 rounded shadow" hx-get="http://localhost:4040/blog/" hx-trigger="load">
+        <div class="text-center text-gray-500">Loading blogs...</div>
+    </div>
+
+    <script>
+        // Listen for HTMX events
+        document.body.addEventListener('htmx:afterOnLoad', function(event) {
+            
+            var response = JSON.parse(event.detail.xhr.response);
+                var container = document.getElementById('blog-container');
+                container.innerHTML = ''; // Clear existing content
+                // Create list of blog titles
+                response.Blogs.forEach(function(blog) {
+                    console.log(blog)
+                    var ul = document.createElement('ul');
+                    ul.textContent = blog.title;
+                    container.appendChild(ul);
+                });
+        });
+    </script>
 </body>
 </html>
